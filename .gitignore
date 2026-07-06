@@ -17,11 +17,6 @@ out/
 .DS_Store
 Thumbs.db
 
-# Cursor (do not commit editor/agent metadata)
-.cursor/
-.cursorrules
-*.cursor.md
-
 # Docs (local drafts — not published to repo)
 docs/
 
