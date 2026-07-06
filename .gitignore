@@ -1,0 +1,30 @@
+# Build
+build/
+.gradle/
+out/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cursor (do not commit editor/agent metadata)
+.cursor/
+.cursorrules
+*.cursor.md
+
+# Logs
+*.log
+
+# Local env
+.env
+.env.local

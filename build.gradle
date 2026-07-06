@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.karthik'
+version = '1.3.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+springBoot {
+    mainClass = 'com.karthik.transformer.JavaMatrixTransformerApplication'
+}
+
+tasks.register('chat', JavaExec) {
+    group = 'application'
+    description = 'Interactive geography chat (terminal)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.karthik.transformer.demo.Main'
+    args = ['chat']
+    standardInput = System.in
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
+tasks.register('demo', JavaExec) {
+    group = 'application'
+    description = 'Transformer internals walkthrough'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.karthik.transformer.demo.Main'
+    args = []
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
+tasks.register('geography', JavaExec) {
+    group = 'application'
+    description = 'Batch geography Q&A demo'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.karthik.transformer.demo.Main'
+    args = ['geography']
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
+test {
+    useJUnitPlatform()
+}
