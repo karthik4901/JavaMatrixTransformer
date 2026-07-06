@@ -22,6 +22,9 @@ Thumbs.db
 .cursorrules
 *.cursor.md
 
+# Docs (local drafts — not published to repo)
+docs/
+
 # Logs
 *.log
 
