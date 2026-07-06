@@ -161,7 +161,3 @@ A real LLM has billions of trained parameters. This repo teaches **how the trans
 ## Author
 
 **Karthik Goud** — [GitHub](https://github.com/karthikgoud)
-
-## License
-
-MIT — use freely, attribution appreciated.
