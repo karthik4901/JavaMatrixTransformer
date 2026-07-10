@@ -245,3 +245,9 @@ Attention is O(n²) in sequence length. The demo config uses `dModel=16`, one la
 | “Geography Q&A” | Yes — via corpus retrieval |
 | “Production LLM” | No |
 | “Research paper ready” | Not yet — training and evaluation still needed |
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
