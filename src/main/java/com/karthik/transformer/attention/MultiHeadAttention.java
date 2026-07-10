@@ -3,33 +3,18 @@ package com.karthik.transformer.attention;
 import com.karthik.transformer.core.Matrix;
 
 /**
- * MultiHeadAttention — run attention multiple times in parallel, each looking
- * at the input from a different "perspective".
+ * Runs several attention heads in parallel, then concatenates and projects.
  *
- * Why multiple heads?
- *   Single attention head: ONE way of measuring token relationships.
- *   Multi-head attention: MANY simultaneous relationship patterns.
+ * <pre>
+ * MultiHead(Q,K,V) = Concat(head₁…headₕ) × Wₒ
+ * headᵢ = Attention(Q W_Qᵢ, K W_Kᵢ, V W_Vᵢ)
+ * </pre>
  *
- *   Head 1 might learn: subject-verb relationships ("paris is")
- *   Head 2 might learn: geographic associations ("paris" ↔ "france")
- *   Head 3 might learn: coreference            ("it" → "the country")
- *   Head 4 might learn: positional proximity    (nearby tokens)
+ * Each head uses {@code dModel / numHeads} dimensions. Different heads can
+ * specialize (syntax vs proximity vs entity links) once the model is trained.
+ * Requires {@code dModel % numHeads == 0}.
  *
- * The model learns WHICH patterns are useful — we just give it the capacity.
- *
- * Architecture:
- *   dModel = total embedding dimension (e.g., 512)
- *   numHeads = number of attention heads (e.g., 8)
- *   dK = dModel / numHeads = per-head dimension (e.g., 64)
- *
- *   Each head operates in a smaller dK-dimensional space,
- *   then all heads are concatenated and projected back to dModel.
- *
- * Formula:
- *   MultiHead(Q, K, V) = Concat(head_1, ..., head_h) × W_O
- *   head_i = Attention(Q × W_Q_i, K × W_K_i, V × W_V_i)
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class MultiHeadAttention {
 

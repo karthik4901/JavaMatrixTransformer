@@ -3,8 +3,11 @@ package com.karthik.transformer.data;
 import java.util.List;
 
 /**
- * World geography facts — the "first Java project" domain for this LLM.
- * Small, factual, globally relevant, and easy to verify.
+ * Fixed set of world-geography facts used for vocabulary and retrieval-based Q&A.
+ *
+ * Chosen as a first domain because answers are short and easy to verify.
+ * Not a trained knowledge base — just declarative sentences scored by
+ * {@link com.karthik.transformer.geography.CorpusRetriever}.
  */
 public final class GeographyCorpus implements Corpus {
 

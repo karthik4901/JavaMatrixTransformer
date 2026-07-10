@@ -1,16 +1,12 @@
 package com.karthik.transformer.core;
 
 /**
- * Matrix — the fundamental building block of every LLM operation.
+ * Dense 2D matrix used by every transformer operation in this project.
  *
- * Every concept in a transformer — embeddings, attention scores, weight updates —
- * is just matrices being multiplied, transposed, and scaled. Understanding this
- * class means understanding 80% of how LLMs work under the hood.
+ * Embeddings, attention scores, and linear projections are all matrix ops.
+ * Methods return new instances (no in-place mutation) so call sites stay easy to reason about.
  *
- * All operations return new Matrix instances (immutable style) so you can chain
- * them and reason about them clearly.
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class Matrix {
 

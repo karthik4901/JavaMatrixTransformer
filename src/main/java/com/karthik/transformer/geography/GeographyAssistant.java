@@ -5,9 +5,11 @@ import com.karthik.transformer.data.GeographyCorpus;
 import com.karthik.transformer.model.TransformerModel;
 
 /**
- * Answers geography questions by retrieving the best-matching fact from the corpus.
- * The transformer model is loaded for the pipeline demo; answers come from the
- * knowledge base until full training is implemented.
+ * Application-facing geography Q&A service.
+ *
+ * Builds a {@link TransformerModel} (for pipeline visibility and future training)
+ * but answers questions through {@link CorpusRetriever} until weights are trained.
+ * Shared by the Spring controller and the terminal chat.
  */
 public final class GeographyAssistant {
 
@@ -21,6 +23,7 @@ public final class GeographyAssistant {
         this.sentenceCount = sentenceCount;
     }
 
+    /** Load geography corpus, build model + retriever. */
     public static GeographyAssistant create() {
         GeographyCorpus corpus = new GeographyCorpus();
         TransformerModel model = TransformerModel.fromCorpus(corpus, ModelConfig.DEMO);
@@ -31,7 +34,9 @@ public final class GeographyAssistant {
     }
 
     /**
-     * Answer a geography question using corpus retrieval.
+     * Return the best matching fact for {@code question}.
+     *
+     * @throws IllegalArgumentException if the question is null or blank
      */
     public String ask(String question) {
         if (question == null || question.isBlank()) {
@@ -44,6 +49,7 @@ public final class GeographyAssistant {
         return sentenceCount;
     }
 
+    /** Short model description for health checks and logs. */
     public String modelSummary() {
         return model.toString();
     }

@@ -13,10 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * End-to-end transformer: tokenize → embed → encode position → transform → predict.
- * <p>
- * Composes modular components behind a single forward-pass API.
- * Swap {@link Corpus}, {@link Tokenizer}, or {@link ModelConfig} without changing inference code.
+ * Full forward pipeline: tokenize → embed → position → transformer layers → LM head.
+ *
+ * Built from a {@link Corpus} and {@link ModelConfig}. Weights are randomly
+ * initialized; without training, {@link #predictNextToken(int[])} is not useful
+ * for real answers. Geography Q&A currently uses corpus retrieval instead.
  */
 public final class TransformerModel {
 
@@ -43,7 +44,7 @@ public final class TransformerModel {
     }
 
     /**
-     * Build a model from a corpus and configuration.
+     * Build vocabulary from the corpus, then allocate embeddings, PE, blocks, and LM head.
      */
     public static TransformerModel fromCorpus(Corpus corpus, ModelConfig config) {
         Tokenizer tokenizer = new SimpleTokenizer();
@@ -63,7 +64,9 @@ public final class TransformerModel {
     }
 
     /**
-     * Forward pass returning contextual representations for every token.
+     * Contextual representations for each input token (shape: seqLen × dModel).
+     *
+     * @throws IllegalArgumentException if empty or longer than {@link ModelConfig#maxSeqLength()}
      */
     public Matrix forward(int[] tokenIds) {
         if (tokenIds == null || tokenIds.length == 0) {
@@ -82,7 +85,8 @@ public final class TransformerModel {
     }
 
     /**
-     * Predict the most likely next token given a token sequence.
+     * Greedy next-token id from the last position's context vector.
+     * Meaningful only after training; used by demos of the generation path.
      */
     public int predictNextToken(int[] tokenIds) {
         Matrix contextual = forward(tokenIds);
@@ -113,6 +117,7 @@ public final class TransformerModel {
         return best;
     }
 
+    /** Rough parameter count: embeddings + each block + LM head. */
     public int countParameters() {
         int total = embedding.getVocabularySize() * embedding.getEmbeddingDim();
         for (TransformerBlock block : blocks) {

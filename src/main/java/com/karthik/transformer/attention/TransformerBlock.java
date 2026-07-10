@@ -3,42 +3,18 @@ package com.karthik.transformer.attention;
 import com.karthik.transformer.core.Matrix;
 
 /**
- * TransformerBlock — one complete encoder layer of a transformer.
+ * One transformer layer: multi-head attention, residual + layer norm,
+ * position-wise feed-forward, then residual + layer norm again.
  *
- * A full GPT/BERT model stacks N of these blocks (GPT-3 has 96 of them).
- * Each block takes input, transforms it, and passes it to the next.
- * After many blocks, the model has deeply encoded the context of every token.
+ * <pre>
+ *   x → Attention → Add&Norm → FFN(dModel→dFF→dModel) → Add&Norm → y
+ * </pre>
  *
- * Architecture of one block:
+ * Residuals keep gradients usable in deeper stacks. The FFN expands to
+ * {@code dFF} (usually 4×dModel) then projects back, applied per position.
+ * Stack many of these for BERT/GPT-scale depth; this project typically uses one.
  *
- *   input
- *     │
- *     ├──────────────────────────┐
- *     │                          │  (residual connection)
- *     ▼                          │
- *   MultiHeadAttention           │
- *     │                          │
- *     └──────► Add & LayerNorm ◄─┘
- *                    │
- *     ┌──────────────┤
- *     │              │  (residual connection)
- *     ▼              │
- *   FeedForward      │
- *     │              │
- *     └──► Add & LayerNorm ◄────┘
- *                    │
- *                  output
- *
- * Residual connections (the "Add" part): output = layer(x) + x
- *   → Prevents vanishing gradients in deep networks
- *   → Lets information flow directly from input to output unchanged if needed
- *
- * FeedForward network: two linear layers with ReLU in between
- *   → dModel → dFF (typically 4× dModel) → dModel
- *   → Applied independently to each position
- *   → Adds non-linearity and capacity beyond attention
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class TransformerBlock {
 
