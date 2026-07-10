@@ -250,4 +250,4 @@ Attention is O(n²) in sequence length. The demo config uses `dModel=16`, one la
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
