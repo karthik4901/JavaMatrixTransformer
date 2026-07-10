@@ -5,9 +5,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Interactive terminal chat — ask geography questions in a loop.
+ * Interactive terminal REPL for geography questions.
  *
- * Run: {@code gradle chat} or {@code ./build/scripts/JavaMatrixTransformer chat}
+ * Run: {@code ./gradlew chat}
+ * Type {@code exit}, {@code quit}, or {@code q} to stop.
  */
 public final class GeographyChat {
 

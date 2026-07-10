@@ -3,20 +3,14 @@ package com.karthik.transformer.tokenizer;
 import java.util.*;
 
 /**
- * SimpleTokenizer — converts raw text into token IDs and back.
+ * Word-level tokenizer: text ↔ integer IDs.
  *
- * Real LLMs use Byte Pair Encoding (BPE) or WordPiece. This implementation
- * uses word-level tokenization to make the concept crystal clear.
- * The principle is identical — map text units to integer IDs so the model
- * can work with numbers instead of strings.
+ * Production models usually use BPE or SentencePiece. This class splits on
+ * whitespace/punctuation so the pipeline stays easy to debug. Special IDs:
+ * {@code PAD=0}, {@code UNK=1}, {@code BOS=2}, {@code EOS=3}.
+ * Unknown words map to {@code UNK}.
  *
- * Special tokens:
- *   [PAD] = 0  — padding to make all sequences the same length
- *   [UNK] = 1  — unknown token (word not in vocabulary)
- *   [BOS] = 2  — beginning of sequence
- *   [EOS] = 3  — end of sequence
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class SimpleTokenizer implements Tokenizer {
 

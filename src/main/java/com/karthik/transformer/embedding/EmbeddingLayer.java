@@ -3,18 +3,12 @@ package com.karthik.transformer.embedding;
 import com.karthik.transformer.core.Matrix;
 
 /**
- * EmbeddingLayer — converts discrete token IDs into dense vector representations.
+ * Token ID → dense vector lookup table ({@code vocabSize × embeddingDim}).
  *
- * Think of it as a lookup table: each token ID maps to a row in a weight matrix.
- * The model LEARNS these vectors during training — words with similar meanings
- * end up with similar vectors (close in vector space).
+ * Rows are Xavier-scaled random values until training updates them. After
+ * training, similar tokens tend to land near each other in vector space.
  *
- * Example: in a geography corpus, "paris" and "france" may end up with
- * similar vectors after training; "paris" and "tokyo" would be farther apart.
- *
- * embeddingDim = how many attributes we track per token (typically 128–4096 in real LLMs)
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class EmbeddingLayer {
 

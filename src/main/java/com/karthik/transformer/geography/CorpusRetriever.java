@@ -7,8 +7,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Finds the best-matching fact from a corpus for a natural-language question.
- * Uses keyword overlap — appropriate until the transformer is fully trained.
+ * Scores corpus sentences against a natural-language question.
+ *
+ * Uses keyword overlap plus light boosts for cue words (capital, longest, …).
+ * Returns a fixed fallback string when no sentence clears the score threshold.
+ * Package-private: only {@link GeographyAssistant} should call this.
  */
 final class CorpusRetriever {
 
@@ -24,6 +27,10 @@ final class CorpusRetriever {
         this.sentences = List.copyOf(sentences);
     }
 
+    /**
+     * Best sentence for the question, or a fallback if nothing scores well enough.
+     * Threshold is intentionally conservative to avoid weak false matches.
+     */
     String findBestAnswer(String question) {
         Set<String> keywords = extractKeywords(question);
         if (keywords.isEmpty()) {

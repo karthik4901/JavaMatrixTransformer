@@ -3,33 +3,18 @@ package com.karthik.transformer.attention;
 import com.karthik.transformer.core.Matrix;
 
 /**
- * ScaledDotProductAttention — the heart of every transformer model.
+ * Scaled dot-product attention (Vaswani et al., 2017).
  *
- * "Attention Is All You Need" (Vaswani et al., 2017) — this single mechanism
- * replaced recurrent networks (LSTMs, GRUs) and became the foundation of
- * GPT, BERT, Claude, and every modern LLM.
+ * <pre>
+ * Attention(Q, K, V) = softmax(Q × Kᵀ / √dₖ) × V
+ * </pre>
  *
- * The core idea: for each token, figure out which other tokens are most
- * relevant, then create a weighted blend of their information.
+ * Q asks what to look for, K describes what each position offers, V carries the
+ * values that get blended. Scaling by √dₖ keeps softmax out of saturation for
+ * larger key dimensions. {@link #maskedForward(Matrix)} applies a causal mask
+ * so position i cannot attend to positions &gt; i (decoder / GPT-style).
  *
- * Three matrices are involved:
- *   Q (Query)  — "What am I looking for?"
- *   K (Key)    — "What do I have to offer?"
- *   V (Value)  — "What information do I actually contain?"
- *
- * Example: token "capital" attending to "paris" and "france" in
- * "paris is the capital of france" — Q asks what relates, K advertises identity,
- * V carries meaning, high-scoring pairs get blended into the output.
- *
- * The full formula:
- *   Attention(Q, K, V) = softmax(Q × K^T / sqrt(d_k)) × V
- *
- *   Step 1: Q × K^T        = raw similarity scores (which tokens relate to which)
- *   Step 2: / sqrt(d_k)    = scale down to prevent softmax saturation
- *   Step 3: softmax(...)   = convert scores to attention weights (sum to 1)
- *   Step 4: weights × V    = weighted blend of value vectors
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class ScaledDotProductAttention {
 

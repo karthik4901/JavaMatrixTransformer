@@ -1,8 +1,11 @@
 package com.karthik.transformer.config;
 
 /**
- * Immutable hyperparameters for a language model.
- * Centralizes configuration so demos, tests, and future training share one source of truth.
+ * Immutable model hyperparameters shared by demos, the Spring bean, and future training.
+ *
+ * {@link #DEMO} is intentionally tiny ({@code dModel=16}, one layer) so the
+ * walkthrough runs quickly on a laptop. {@code dModel} must be divisible by
+ * {@code numHeads} or construction fails.
  */
 public record ModelConfig(
     int dModel,
@@ -11,6 +14,7 @@ public record ModelConfig(
     int maxSeqLength,
     int numLayers
 ) {
+    /** Small config used by demos and the geography API. */
     public static final ModelConfig DEMO = new ModelConfig(16, 4, 64, 64, 1);
 
     public ModelConfig {
@@ -23,6 +27,7 @@ public record ModelConfig(
         }
     }
 
+    /** Per-head key/query dimension ({@code dModel / numHeads}). */
     public int headDim() {
         return dModel / numHeads;
     }

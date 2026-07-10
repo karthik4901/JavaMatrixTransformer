@@ -4,9 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Spring Boot entry point — starts the geography REST API on port 8080.
+ * Spring Boot entry point for the geography REST API.
  *
- * Run: {@code gradle bootRun}
+ * Run with {@code ./gradlew bootRun}. Default port is 8080
+ * ({@code src/main/resources/application.properties}).
  */
 @SpringBootApplication
 public class JavaMatrixTransformerApplication {

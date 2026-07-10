@@ -1,50 +1,124 @@
 # JavaMatrixTransformer
 
-**Transformer internals from scratch in Java 21 — plus a Spring Boot geography Q&A API.**
+A from-scratch transformer implementation in Java 21, with a Spring Boot API for geography Q&A.
 
-> Learn transformers the same way you learned Java: Hello World → variables → methods → your first real project.
+Most transformer tutorials live in Python. This project rebuilds the core pieces — matrix math, tokenization, embeddings, attention, and a transformer block — in plain Java so the mechanics are easy to read and step through. On top of that, it exposes a small geography question-answering service over HTTP and the terminal.
 
-This is **not** a billion-parameter LLM. It is a small teaching repo that implements the transformer architecture behind GPT and BERT — matrix by matrix — with a working **World Geography** Q&A app on top.
+This is a learning and engineering project, not a production LLM. Model weights are randomly initialized. Geography answers today come from corpus retrieval over a fixed fact set, not from trained next-token generation.
 
-## Prerequisites
+**Author:** Karthik Goud · [GitHub](https://github.com/karthik4901)
 
-```bash
-java --version   # 21+
-gradle --version # 8+
+---
+
+## Why this exists
+
+Three problems I wanted to solve for myself:
+
+1. **Understand transformers without a framework.** Reading PyTorch code hides the math. Writing multiply, softmax, and attention by hand makes the paper concrete.
+2. **Keep the JVM in the loop.** Java engineers often treat ML as a Python-only skill. This repo shows the same architecture can live on the JVM.
+3. **Ship something usable early.** A demo that only prints matrices is hard to share. A Spring Boot endpoint and a terminal chat make the project testable and reviewable.
+
+Geography was chosen as the first domain because facts are short, checkable, and easy to expand later.
+
+---
+
+## Features
+
+- Pure Java matrix engine (multiply, transpose, softmax, layer norm, cosine similarity)
+- Word-level tokenizer with special tokens (`PAD`, `UNK`, `BOS`, `EOS`)
+- Embedding layer and sine/cosine positional encoding
+- Scaled dot-product attention and multi-head attention
+- Transformer block with residual connections and feed-forward network
+- Composable `TransformerModel` pipeline
+- Pluggable `Corpus` / `Tokenizer` interfaces
+- Geography Q&A via keyword retrieval over 100+ facts
+- Spring Boot REST API (`/health`, `/api/ask`)
+- Interactive terminal chat
+- Internals walkthrough demo
+- Controller tests with MockMvc
+
+---
+
+## Architecture
+
+```
+Text
+  → Tokenizer          (words → token IDs)
+  → EmbeddingLayer     (IDs → dense vectors)
+  → PositionalEncoding (add position signal)
+  → TransformerBlock×N (attention + FFN + residuals)
+  → LM head            (context → next-token logits)
 ```
 
-## Quick Start
+Geography Q&A path (current):
+
+```
+HTTP / chat
+  → GeographyAssistant
+  → CorpusRetriever     (keyword score against GeographyCorpus)
+  → best matching fact
+```
+
+The transformer stack is built and held by `GeographyAssistant` so the pipeline is real and inspectable. Answers are retrieved from the corpus until training is implemented. That split is intentional: architecture first, training later.
+
+### Package layout
+
+```
+com.karthik.transformer
+├── JavaMatrixTransformerApplication   Spring Boot entry point
+├── spring/                            Bean wiring
+├── web/                               REST controller + DTOs
+├── config/                            ModelConfig
+├── core/                              Matrix
+├── tokenizer/                         Tokenizer, SimpleTokenizer
+├── embedding/                         EmbeddingLayer
+├── encoding/                          PositionalEncoding
+├── attention/                         Attention + TransformerBlock
+├── model/                             TransformerModel
+├── data/                              Corpus, GeographyCorpus
+├── geography/                         Assistant, retriever, chat CLI
+└── demo/                              Internals and batch demos
+```
+
+### Core formula
+
+```
+Attention(Q, K, V) = softmax(Q × Kᵀ / √dₖ) × V
+```
+
+Implemented in `ScaledDotProductAttention`.
+
+---
+
+## Requirements
+
+- Java 21+
+- Gradle 8+ (wrapper included)
+
+---
+
+## Setup
 
 ```bash
-git clone https://github.com/karthikgoud/JavaMatrixTransformer.git
+git clone https://github.com/karthik4901/JavaMatrixTransformer.git
 cd JavaMatrixTransformer
-gradle build
-gradle bootRun          # Spring Boot REST API → http://localhost:8080
+./gradlew build
 ```
 
-## Run & Test
+---
 
-### Build and test
+## Run
+
+### Spring Boot API
 
 ```bash
-gradle build
+./gradlew bootRun
 ```
 
-Runs unit tests (including Spring MVC controller tests). Expect `BUILD SUCCESSFUL`.
-
-### Spring Boot REST API (main entry point)
-
-```bash
-gradle bootRun
-```
-
-| Setting | Value |
-|---------|-------|
+| Item | Value |
+|------|-------|
 | Main class | `com.karthik.transformer.JavaMatrixTransformerApplication` |
 | Port | `8080` (`src/main/resources/application.properties`) |
-| Framework | Spring Boot 3 |
-
-**Endpoints:**
 
 ```bash
 # Health
@@ -59,105 +133,121 @@ curl -X POST http://localhost:8080/api/ask \
   -d '{"question":"What is the capital of Japan?"}'
 ```
 
-**Example response:**
+Example response:
 
 ```json
-{"question":"What is the capital of France?","answer":"Paris is the capital of France."}
+{
+  "question": "What is the capital of France?",
+  "answer": "Paris is the capital of France."
+}
 ```
 
-### Transformer internals demo
-
-Walks through all 9 building blocks (matrix → tokenization → attention → transformer):
+### Terminal chat
 
 ```bash
-gradle demo
+./gradlew chat
 ```
 
-### Batch geography Q&A
+```
+Question: What is the longest river in Africa?
+Answer:  The Nile is the longest river in Africa.
+```
 
-Runs 10 sample questions automatically:
+### Internals walkthrough
+
+Prints each building block with geography examples:
 
 ```bash
-gradle geography
+./gradlew demo
 ```
 
-### Interactive terminal chat
+### Batch Q&A
+
+Runs the sample question list from `GeographyCorpus`:
 
 ```bash
-gradle chat
+./gradlew geography
 ```
 
-```
-────────────────────────────────────────
-Question: What is the capital of France?
-Answer:  Paris is the capital of France.
+### Command summary
 
-────────────────────────────────────────
-Question: exit
-Goodbye!
-```
+| Command | What it does |
+|---------|--------------|
+| `./gradlew build` | Compile and run tests |
+| `./gradlew bootRun` | Start Spring Boot API on :8080 |
+| `./gradlew demo` | Transformer internals demo |
+| `./gradlew geography` | Batch geography Q&A |
+| `./gradlew chat` | Interactive terminal chat |
+| `./gradlew clean build` | Clean rebuild |
 
-## Command Reference
+---
 
-| Command | Description |
-|---------|-------------|
-| `gradle build` | Compile + test |
-| `gradle bootRun` | **Spring Boot API** (port 8080) |
-| `gradle demo` | Internals walkthrough |
-| `gradle geography` | Batch Q&A (10 questions) |
-| `gradle chat` | Interactive terminal chat |
-| `gradle clean build` | Clean rebuild |
+## Testing
 
-## Project Structure
-
-```
-com.karthik.transformer
-├── JavaMatrixTransformerApplication.java   ← Spring Boot main
-├── spring/          GeographyBeanConfig
-├── web/             GeographyController + DTOs
-├── config/          ModelConfig
-├── core/            Matrix
-├── tokenizer/       Tokenizer → SimpleTokenizer
-├── embedding/       EmbeddingLayer
-├── encoding/        PositionalEncoding
-├── attention/       ScaledDotProductAttention → TransformerBlock
-├── model/           TransformerModel
-├── data/            Corpus → GeographyCorpus
-├── geography/       GeographyAssistant, CorpusRetriever, GeographyChat
-└── demo/            Demo, GeographyQADemo, Main (non-Spring CLI)
+```bash
+./gradlew test
 ```
 
-## What's Implemented
+Current coverage focuses on the HTTP layer:
 
-| Layer | Class | Purpose |
-|-------|-------|---------|
-| Matrix engine | `Matrix` | Multiply, transpose, softmax, layer norm |
-| Tokenizer | `Tokenizer` / `SimpleTokenizer` | Text ↔ token IDs |
-| Embeddings | `EmbeddingLayer` | Token ID → dense vectors |
-| Position | `PositionalEncoding` | Sine/cosine position injection |
-| Attention | `ScaledDotProductAttention` | Core attention mechanism |
-| Multi-head | `MultiHeadAttention` | Parallel attention heads |
-| Transformer | `TransformerBlock` | Full encoder layer |
-| Model | `TransformerModel` | Composable transformer pipeline |
-| Geography | `GeographyAssistant` | Q&A via corpus retrieval |
-| API | `GeographyController` | Spring Boot REST endpoints |
+- `GeographyControllerTest` — health, GET ask, POST ask (MockMvc + mocked assistant)
 
-## How Geography Q&A Works
+### TODO — tests still needed
 
-1. **Transformer demo** — `gradle demo` shows how the neural architecture works (untrained weights).
-2. **Geography answers** — chat and API use **corpus retrieval**: keyword matching against 100+ geography facts.
-3. **Future** — backprop training would let the model generate answers directly.
+- [ ] Unit tests for `Matrix` (shape checks, softmax row sums, layer norm)
+- [ ] Unit tests for `SimpleTokenizer` (encode/decode round-trip, unknown tokens)
+- [ ] Unit tests for `CorpusRetriever` (exact match, weak match, empty query)
+- [ ] Unit tests for `TransformerModel.forward` (shape invariants)
+- [ ] Integration test for `bootRun` health endpoint without mocking
 
-## Key Formula
+---
 
-```
-Attention(Q, K, V) = softmax(Q × Kᵀ / √dₖ) × V
-```
+## Engineering notes
 
-## Why Not Call It an "LLM"?
+**Why pure Java matrices?**  
+No ND4J or PyTorch JNI. Every operation is readable. That makes the project useful for interviews and teaching, at the cost of speed.
 
-A real LLM has billions of trained parameters. This repo teaches **how the transformer machinery works** at small scale. That is honest and useful.
+**Why word-level tokenization?**  
+BPE is the right production choice. Word-level keeps the first version inspectable. The `Tokenizer` interface is there so BPE can be added without rewriting the model.
 
-## Author
+**Why retrieval for Q&A?**  
+Untrained random weights produce garbage text. Returning a scored corpus fact is honest and useful. The transformer path stays in the codebase for the next step: training.
 
-**Karthik Goud** — [GitHub](https://github.com/karthikgoud)
+**Why Spring Boot for a teaching model?**  
+A REST surface makes the project reviewable by other engineers. It also forces clean boundaries: controller → assistant → retriever/model.
+
+**Config as a record.**  
+`ModelConfig` validates `dModel % numHeads == 0` at construction. Invalid shapes fail fast instead of failing deep inside attention.
+
+**Performance awareness.**  
+Attention is O(n²) in sequence length. The demo config uses `dModel=16`, one layer, and short sequences on purpose. Scaling needs batching, better matrix kernels, and eventually native acceleration — none of that is claimed here.
+
+---
+
+## Future improvements
+
+1. **Training loop** — cross-entropy loss, backprop through the transformer, Adam optimizer, checkpoint save/load
+2. **BPE tokenizer** — replace word-level tokenization for better coverage
+3. **Larger corpus** — more geography facts, then other domains via `Corpus`
+4. **Neural answers** — once trained, generate answers from the LM head instead of retrieval
+5. **KV cache** — speed up autoregressive decoding
+6. **Broader tests** — matrix, tokenizer, retriever, and model shape tests listed above
+7. **Write-up** — short technical note or blog post on implementing attention in Java
+
+---
+
+## Honest limits
+
+| Claim | Reality |
+|-------|---------|
+| “Transformer from scratch” | Yes — core math and layers are hand-written |
+| “Trained language model” | No — weights are random |
+| “Geography Q&A” | Yes — via corpus retrieval |
+| “Production LLM” | No |
+| “Research paper ready” | Not yet — training and evaluation still needed |
+
+---
+
+## License
+
+MIT

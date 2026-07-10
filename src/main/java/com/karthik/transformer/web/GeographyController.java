@@ -8,11 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * HTTP surface for geography Q&A.
+ *
+ * <ul>
+ *   <li>{@code GET /health} — liveness + corpus/model summary</li>
+ *   <li>{@code GET /api/ask?q=...} — ask via query string</li>
+ *   <li>{@code POST /api/ask} — ask via JSON body {@code {"question":"..."}}</li>
+ * </ul>
+ */
 @RestController
 public class GeographyController {
 

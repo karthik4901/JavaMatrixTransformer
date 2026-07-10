@@ -3,31 +3,20 @@ package com.karthik.transformer.encoding;
 import com.karthik.transformer.core.Matrix;
 
 /**
- * PositionalEncoding — tells the transformer WHERE each token appears in the sequence.
+ * Fixed sine/cosine positional encodings (Vaswani et al., 2017).
  *
- * Problem: attention is order-agnostic. "Dog bites man" and "Man bites dog" would
- * produce identical embeddings without positional encoding — the model cannot
- * distinguish word order.
+ * Self-attention alone is permutation-invariant. Adding PE(pos) to each
+ * embedding injects order so "paris is capital" differs from a shuffled sequence.
  *
- * Solution: add a unique positional signal to each token's embedding BEFORE
- * feeding into the transformer. We use sine and cosine waves at different
- * frequencies — the original "Attention Is All You Need" (Vaswani et al., 2017) approach.
+ * <pre>
+ * PE(pos, 2i)   = sin(pos / 10000^(2i / d_model))
+ * PE(pos, 2i+1) = cos(pos / 10000^(2i / d_model))
+ * </pre>
  *
- * Formula:
- *   PE(pos, 2i)   = sin(pos / 10000^(2i / d_model))
- *   PE(pos, 2i+1) = cos(pos / 10000^(2i / d_model))
+ * Precomputed up to {@code maxSeqLen}; sequences longer than that are rejected
+ * by callers that check length (see {@link com.karthik.transformer.model.TransformerModel}).
  *
- * Where:
- *   pos      = position of the token in the sequence (0, 1, 2, ...)
- *   i        = dimension index (0, 1, 2, ... d_model/2)
- *   d_model  = embedding dimension
- *
- * Why sine/cosine?
- *   - Produces a unique pattern for every position
- *   - The model can learn to attend by relative position (sin/cos have this property)
- *   - Generalizes to sequences longer than seen during training
- *
- * @author Karthik Goud (Karthik Goud)
+ * @author Karthik Goud
  */
 public class PositionalEncoding {
 
